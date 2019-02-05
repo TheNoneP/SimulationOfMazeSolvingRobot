@@ -25,6 +25,7 @@ int  itr = 1,lC=-1,rC=-1,Con= 10;
 int BArray[20]={0};
 short parent=1;
 int ID=0,preID=1,nexID=1;
+
 struct Node{
 	Node *parentPointer=NULL;
 	Node *leftChild=NULL;
@@ -38,7 +39,7 @@ Node *root = new Node();
 Node *preNode,*targetNode;
 string preNodeToCPDir="",CPToTargetDir="";
 string preNodeToCPID="",targetNodeToCPID="";
-queue<Node> Q;
+queue<Node*> Q;
 void fillSpace(short sI,short eI,short sJ,short eJ)
 {
 	for(int i=sI;i<=eI;i++)
@@ -243,7 +244,7 @@ void moveForward()
 					updatePos(SI,SJ-1);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(300);
+					Sleep(20);
 					SJ -=1;
 				}else goal = true;
 				}
@@ -253,7 +254,7 @@ void moveForward()
 					updatePos(SI,SJ+1);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(300);
+					Sleep(20);
 					SJ +=1;
 				}else goal = true;
 				}
@@ -263,7 +264,7 @@ void moveForward()
 					updatePos(SI-1,SJ);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(300);
+					Sleep(20);
 					SI -=1;
 				}else goal = true;
 				}
@@ -273,7 +274,7 @@ void moveForward()
 					updatePos(SI+1,SJ);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(300);
+					Sleep(20);
 					SI +=1;
 				}else goal = true;
 				}
@@ -306,7 +307,7 @@ void initializeRoot()
 {
 	initializeNode(root,'f','f',false,NULL,NULL,NULL,assignID());
 	updateID();
-	Q.push(*root);
+	Q.push(root);
 }
 
 void exploreChilds(Node *node)
@@ -324,21 +325,23 @@ void exploreChilds(Node *node)
 			Node *tem = new Node();
 			initializeNode(tem,'l','l',false,NULL,NULL,node,assignID());
 			node->leftChild=tem;
-			Q.push(*tem);
+			Q.push(tem);
 			// the below is forward child or right
 			if(front==true)
 			{
 				Node *tem = new Node();	
 				initializeNode(tem,'r','f',false,NULL,NULL,node,assignID());
 				node->rightChild=tem;
-				Q.push(*tem);
+				Q.push(tem);
+				cout<<"two childs\n";
 			}
 			else if(righT==true)
 			{
 				Node *tem = new Node();	
 				initializeNode(tem,'r','r',false,NULL,NULL,node,assignID());
 				node->rightChild=tem;
-				Q.push(*tem);
+				Q.push(tem);
+				cout<<"two childs\n";
 			}
 			updateID();
 		}
@@ -349,23 +352,26 @@ void exploreChilds(Node *node)
 				Node *tem = new Node();
 				initializeNode(tem,'l','l',false,NULL,NULL,node,assignID());
 				node->leftChild=tem;
-				Q.push(*tem);
+				Q.push(tem);
+				cout<<"two childs\n";
 			}
 			else if(front==true)
 			{
 				Node *tem = new Node();
 				initializeNode(tem,'l','f',false,NULL,NULL,node,assignID());
 				node->leftChild=tem;
-				Q.push(*tem);
+				Q.push(tem);
+				cout<<"two childs\n";
 			}// left child as front of left in maze
 			Node *tem = new Node();
 			initializeNode(tem,'r','r',false,NULL,NULL,node,assignID());
 			node->rightChild=tem;
-			Q.push(*tem);
+			Q.push(tem);
 			
 		
 			updateID();
 		}
+		int ds; cin>>ds;
 	}
 	
 }
@@ -381,10 +387,11 @@ void printNodeDe(Node *node)
 }
 void firstRun()
 {
-	Node *first = &Q.front();
+	Node *first = Q.front();
 	Q.pop();
 	exploreChilds(first);
-	
+	root->leftChild = Q.front();
+	root->rightChild = Q.back();
 }
 void mapDirToParent(char dir)
 {
@@ -431,8 +438,8 @@ cout<<"tt1 :"<<tt1<<endl;
 cout<<"tt2 :"<<tt2<<endl;
 cout<<"root :"<<root<<endl;
 cout<<tt1->ID<<endl;
-int fd;cin>>fd;
-	while(tt1!=NULL && tt1->ID <= assignID() )	
+
+	while(tt1->parentPointer!=NULL )	
 	{
 		ostringstream c1,c2,c3,c4;
 			c2 <<tt1->ID;
@@ -443,15 +450,14 @@ int fd;cin>>fd;
 			preNodeToCPDir.append(c3.str());
 			tt1 = tt1->parentPointer;
 	}
-	while( tt2!=NULL && tt2->ID <= assignID()){
+	while( tt2->parentPointer!=NULL  ){
 		ostringstream c1,c2,c3,c4;
-		if(tt2!=NULL){
 			c1 << tt2->ID;
 			targetNodeToCPID.append(c1.str());
 			c4 <<tt2->dirInMaze;
 			CPToTargetDir.append(c4.str());
 			tt2 = tt2->parentPointer;
-		}
+		
 		cout<<"entered !!!"<<endl;
 	}
 	cout<<"id :"<<preNodeToCPID<<endl;
@@ -585,6 +591,30 @@ void moveIndirectly(Node *node)
 	CPToTargetDir="";
 	targetNodeToCPID="";
 }
+int co()
+{
+	Node *t = root;
+	queue<Node*> fq ;
+	fq.push(t);
+	int cc = 0;
+	while(fq.size()>0)
+	{
+		cc++;
+		Node *n = fq.front();
+		if(n->leftChild!=NULL)
+		{
+			fq.push(n->leftChild);
+			cout<<n->leftChild<<endl;
+		}
+		if(n->rightChild!=NULL)
+		{
+			fq.push(n->rightChild);
+			cout<<n->rightChild<<endl;
+		}
+		fq.pop();
+	}
+	return cc;
+}
 main()
 {
 	short val = 4;
@@ -613,7 +643,7 @@ main()
 			
 			while(Q.empty()==false)
 			{
-				Node *node = &Q.front();
+				Node *node = Q.front();
 				//printNodeDe(node);
 				cout<<"\npreID :"<<preID<<"\nnode ID :"<<node->ID<<endl;
 				int xy;cin>>xy;
@@ -633,6 +663,7 @@ main()
 				Q.pop();
 				
 			}
+			cout<<"nodes :"<<co()<<endl;
 		}
 		else if(val == 5 ){
 			goal = false;
