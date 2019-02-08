@@ -261,7 +261,7 @@ void moveForward(Node *node)
 					updatePos(SI,SJ-1);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(20);
+					Sleep(300);
 					SJ -=1;
 				}else goal = true;
 				}
@@ -278,7 +278,7 @@ void moveForward(Node *node)
 					updatePos(SI,SJ+1);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(20);
+					Sleep(300);
 					SJ +=1;
 				}else goal = true;
 				}
@@ -295,7 +295,7 @@ void moveForward(Node *node)
 					updatePos(SI-1,SJ);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(20);
+					Sleep(300);
 					SI -=1;
 				}else goal = true;
 				}
@@ -312,7 +312,7 @@ void moveForward(Node *node)
 					updatePos(SI+1,SJ);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(20);
+					Sleep(300);
 					SI +=1;
 				}else goal = true;
 				}
@@ -504,25 +504,32 @@ char returnCommonParent()
 		
 		//cout<<"entered !!!"<<endl;
 	}
-	cout<<"id :"<<preNodeToCPID<<endl;
-	cout<<"id :"<<targetNodeToCPID<<endl;
-	cout<<"dir :"<<preNodeToCPDir<<endl;
-	cout<<"dir2 :"<<CPToTargetDir<<endl;
+//	cout<<"id :"<<preNodeToCPID<<endl;
+//	cout<<"id :"<<targetNodeToCPID<<endl;
+//	cout<<"dir :"<<preNodeToCPDir<<endl;
+//	cout<<"dir2 :"<<CPToTargetDir<<endl;
 	bool found = false;
 	char c;
-	int ind = -1;
+	int ind = -1,coc=0;
 	for(int i=0;i<preNodeToCPID.length();i++){
 		for(int j=0;j<targetNodeToCPID.length();j++)
 			if(preNodeToCPID[i]==targetNodeToCPID[j]){
 			c = preNodeToCPID[i];
 			ind = i;
+			coc++;
 		}
+		if(coc>1)break;
 	}
 	preNodeToCPID = preNodeToCPID.substr(0,preNodeToCPID.find(c));
 	preNodeToCPDir = preNodeToCPDir.substr(0,preNodeToCPID.length());
 	targetNodeToCPID = targetNodeToCPID.substr(0,targetNodeToCPID.find(c));
 	CPToTargetDir = CPToTargetDir.substr(0,targetNodeToCPID.length());
+//	cout<<"id :"<<preNodeToCPID<<endl;
+//	cout<<"id :"<<targetNodeToCPID<<endl;
+//	cout<<"dir :"<<preNodeToCPDir<<endl;
+//	cout<<"dir2 :"<<CPToTargetDir<<endl;
 	cout<<"common parent ID :"<<c<<endl;
+//	int xd ;cin>>xd;
 	return c;
 }
 void moveDirectly(Node *node)
