@@ -9,12 +9,12 @@ int space[11][20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
                    0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
 				   1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,
 				   0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
-				   0,0,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,
+				   0,0,0,6,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,
 				   0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
 				   0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
 				   0,0,0,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,
 				   0,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,
-				   0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,6,0,0,0,0,
+				   0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,
 				   0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0};
 char dir ='L';
 short SI=0,SJ=19;
@@ -35,6 +35,7 @@ struct Node{
 	char dirFromParent;
 	char dirInMaze;
 	int ID;
+	int NID;
 	bool isDiscovered;
 };
 Node *root = new Node();
@@ -261,7 +262,7 @@ void moveForward(Node *node)
 					updatePos(SI,SJ-1);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(300);
+					Sleep(20);
 					SJ -=1;
 				}else goal = true;
 				}
@@ -278,7 +279,7 @@ void moveForward(Node *node)
 					updatePos(SI,SJ+1);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(300);
+					Sleep(20);
 					SJ +=1;
 				}else goal = true;
 				}
@@ -295,7 +296,7 @@ void moveForward(Node *node)
 					updatePos(SI-1,SJ);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(300);
+					Sleep(20);
 					SI -=1;
 				}else goal = true;
 				}
@@ -312,7 +313,7 @@ void moveForward(Node *node)
 					updatePos(SI+1,SJ);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(300);
+					Sleep(20);
 					SI +=1;
 				}else goal = true;
 				}
@@ -336,7 +337,12 @@ int assignID()
 {
 	return ID;
 }
-void initializeNode(Node *node,char dirFromPar,char dirInMaz,bool isDis,Node *lefChi,Node *midChi,Node *righChi,Node *parPo,int ID)
+int nid=1;
+int returnNID()
+{
+	return nid++;
+}
+void initializeNode(Node *node,char dirFromPar,char dirInMaz,bool isDis,Node *lefChi,Node *midChi,Node *righChi,Node *parPo,int ID,int nid)
 {
 	node->dirFromParent=dirFromPar;
 	node->dirInMaze=dirInMaz;
@@ -346,10 +352,11 @@ void initializeNode(Node *node,char dirFromPar,char dirInMaz,bool isDis,Node *le
 	node->rightChild = righChi;
 	node->parentPointer=parPo;
 	node->ID = ID;
+	node->NID=nid;
 }
 void initializeRoot()
 {
-	initializeNode(root,'f','f',false,NULL,NULL,NULL,NULL,assignID());
+	initializeNode(root,'f','f',false,NULL,NULL,NULL,NULL,assignID(),0);
 	updateID();
 	Q.push(root);
 }
@@ -367,14 +374,14 @@ void exploreChilds(Node *node)
 		if(lefT==true)
 		{
 			Node *tem = new Node();
-			initializeNode(tem,'l','l',false,NULL,NULL,NULL,node,assignID());
+			initializeNode(tem,'l','l',false,NULL,NULL,NULL,node,assignID(),returnNID());
 			node->leftChild=tem;
 			Q.push(tem);
 			// the below is forward child or right
 			if(front==true)
 			{
 				Node *tem = new Node();	
-				initializeNode(tem,'m','f',false,NULL,NULL,NULL,node,assignID());
+				initializeNode(tem,'m','f',false,NULL,NULL,NULL,node,assignID(),returnNID());
 				node->middleChild=tem;
 				Q.push(tem);
 				//cout<<"two childs\n";
@@ -382,7 +389,7 @@ void exploreChilds(Node *node)
 			 if(righT==true)
 			{
 				Node *tem = new Node();	
-				initializeNode(tem,'r','r',false,NULL,NULL,NULL,node,assignID());
+				initializeNode(tem,'r','r',false,NULL,NULL,NULL,node,assignID(),returnNID());
 				node->rightChild=tem;
 				Q.push(tem);
 				//cout<<"two childs\n";
@@ -394,7 +401,7 @@ void exploreChilds(Node *node)
 			if(lefT==true)
 			{
 				Node *tem = new Node();
-				initializeNode(tem,'l','l',false,NULL,NULL,NULL,node,assignID());
+				initializeNode(tem,'l','l',false,NULL,NULL,NULL,node,assignID(),returnNID());
 				node->leftChild=tem;
 				Q.push(tem);
 				//cout<<"two childs\n";
@@ -402,13 +409,13 @@ void exploreChilds(Node *node)
 			if(front==true)
 			{
 				Node *tem = new Node();
-				initializeNode(tem,'m','f',false,NULL,NULL,NULL,node,assignID());
+				initializeNode(tem,'m','f',false,NULL,NULL,NULL,node,assignID(),returnNID());
 				node->middleChild=tem;
 				Q.push(tem);
 				//cout<<"two childs\n";
 			}// left child as front of left in maze
 			Node *tem = new Node();
-			initializeNode(tem,'r','r',false,NULL,NULL,NULL,node,assignID());
+			initializeNode(tem,'r','r',false,NULL,NULL,NULL,node,assignID(),returnNID());
 			node->rightChild=tem;
 			Q.push(tem);
 			
@@ -469,16 +476,83 @@ void backToParent(Node *node)
 	}
 	mapDirToParent(node->dirInMaze);
 }
-char returnCommonParent()
+string returnSub(string st,int s)
 {
-	
+	string tem="";
+	if(s==0)return st.substr(0,st.find('|'));
+	else
+	{
+		while(st[s]!='|')
+		{
+			tem +=st[s];
+			s++;
+		}
+		return tem;
+	}
+}
+void displayQ(queue<int> tem)
+{
+	cout<<"displaying queue\n";
+	while(tem.size()!=0){
+		cout<<tem.front()<<" | ";
+		tem.pop();
+	}
+	cout<<endl;
+}
+int returnCommonNID(queue<int> pre,queue<int> tar)
+{
+	int tem1,tem2,val;
+	queue<int> hold;
+	bool found = false;
+	while(pre.size()!=0)
+	{
+		tem1=pre.front();
+		while(tar.size()!=0)
+		{
+			tem2 = tar.front();
+			if(tem1==tem2)
+			{
+				val = tem1;
+				found = true;
+				break;
+			}
+			hold.push(tem2);
+			tar.pop();
+		}
+		if(found == true)
+		{
+			break;
+		}
+		while(hold.size()!=0)
+		{
+			tar.push(hold.front());
+			hold.pop();
+		}
+		pre.pop();
+	}
+	return val;
+}
+string findDirToTar(Node *node,int com)
+{
+	string st="";
+	while(node->NID!=com)
+	{
+		st +=node->dirInMaze;
+		node = node->parentPointer;
+	}
+	return st;
+}
+int returnCommonParent()
+{
+	queue<int> pre;
+	queue<int> tar;
 	Node *tt1,*tt2;
 	tt1=preNode;
 	tt2=targetNode;
 //	printNodeDe(tt1);
 //	cout<<"-------------------------\n";
 //	printNodeDe(tt2);
-//cout<<"tt1 :"<<tt1<<endl;
+//cout<<"tt1 :"<<tt1<<en dl;
 //cout<<"tt2 :"<<tt2<<endl;
 //cout<<"root :"<<root<<endl;
 //cout<<tt1->ID<<endl;
@@ -486,51 +560,54 @@ char returnCommonParent()
 	while(tt1!=NULL )	
 	{
 		ostringstream c1,c2,c3,c4;
-			c2 <<tt1->ID;
-//			cout<<"id par :"<<tt1->ID<<endl;
-			
-			preNodeToCPID.append(c2.str());
+			pre.push(tt1->NID);
 			c3 <<tt1->dirInMaze;
 			preNodeToCPDir.append(c3.str());
 			tt1 = tt1->parentPointer;
 	}
 	while( tt2!=NULL  ){
 		ostringstream c1,c2,c3,c4;
-			c1 << tt2->ID;
-			targetNodeToCPID.append(c1.str());
+			tar.push(tt2->NID);
 			c4 <<tt2->dirInMaze;
 			CPToTargetDir.append(c4.str());
 			tt2 = tt2->parentPointer;
 		
 		//cout<<"entered !!!"<<endl;
 	}
-//	cout<<"id :"<<preNodeToCPID<<endl;
-//	cout<<"id :"<<targetNodeToCPID<<endl;
-//	cout<<"dir :"<<preNodeToCPDir<<endl;
-//	cout<<"dir2 :"<<CPToTargetDir<<endl;
+	cout<<"pre size"<<pre.size()<<endl;
+	cout<<"tar size"<<tar.size()<<endl;
+	cout<<"dir :"<<preNodeToCPDir<<endl;
+	cout<<"dir2 :"<<CPToTargetDir<<endl;
+	displayQ(pre);
+	displayQ(tar);
+	int theVar = returnCommonNID(pre,tar);
+	cout<<"common is :"<<theVar<<endl;
+	tt2 = targetNode;
+	CPToTargetDir = findDirToTar(tt2,theVar);
 	bool found = false;
-	char c;
+	string c;
 	int ind = -1,coc=0;
-	for(int i=0;i<preNodeToCPID.length();i++){
-		for(int j=0;j<targetNodeToCPID.length();j++)
-			if(preNodeToCPID[i]==targetNodeToCPID[j]){
-			c = preNodeToCPID[i];
-			ind = i;
-			coc++;
-		}
-		if(coc>1)break;
-	}
-	preNodeToCPID = preNodeToCPID.substr(0,preNodeToCPID.find(c));
-	preNodeToCPDir = preNodeToCPDir.substr(0,preNodeToCPID.length());
-	targetNodeToCPID = targetNodeToCPID.substr(0,targetNodeToCPID.find(c));
-	CPToTargetDir = CPToTargetDir.substr(0,targetNodeToCPID.length());
+	cin>>ind;
+//	for(int i=0;i<preNodeToCPID.length();i++){
+//		for(int j=0;j<targetNodeToCPID.length();j++)
+//			if(preNodeToCPID[i]==targetNodeToCPID[j]){
+//			c = preNodeToCPID[i];
+//			ind = i;
+//			coc++;
+//		}
+//		if(coc>1)break;
+//	}
+//	preNodeToCPID = preNodeToCPID.substr(0,preNodeToCPID.find(c));
+//	preNodeToCPDir = preNodeToCPDir.substr(0,preNodeToCPID.length());
+//	targetNodeToCPID = targetNodeToCPID.substr(0,targetNodeToCPID.find(c));
+//	CPToTargetDir = CPToTargetDir.substr(0,targetNodeToCPID.length());
 //	cout<<"id :"<<preNodeToCPID<<endl;
 //	cout<<"id :"<<targetNodeToCPID<<endl;
 //	cout<<"dir :"<<preNodeToCPDir<<endl;
 //	cout<<"dir2 :"<<CPToTargetDir<<endl;
-	cout<<"common parent ID :"<<c<<endl;
+//	cout<<"common parent ID :"<<c<<endl;
 //	int xd ;cin>>xd;
-	return c;
+	return theVar;
 }
 void moveDirectly(Node *node)
 {
@@ -568,14 +645,14 @@ void moveDirectly(Node *node)
 }
 void moveToCommonParent()
 {
-	int id = (int)returnCommonParent()-48;
+	int id = returnCommonParent();
 	//cout<<"idD :"<<id<<endl;
 	if(preNodeToCPDir.length()>0)
 	{
 //		cout<<"length :"<<preNodeToCPDir.length()<<endl;
 //		cout<<"preIDs :"<<preNode->ID<<endl;
 //		cout<<"preNode :"<<preNode<<endl;
-		while(preNode->ID!=id && preNode!=NULL)
+		while(preNode->NID!=id && preNode!=NULL)
 		{
 //			cout<<"backing \n";
 			backToParent(preNode);
@@ -682,7 +759,7 @@ int co()
 		if(n->middleChild!=NULL)
 		{
 			fq.push(n->middleChild);
-			cout<<n->rightChild<<endl;
+			cout<<n->middleChild<<endl;
 		}
 		fq.pop();
 	}
