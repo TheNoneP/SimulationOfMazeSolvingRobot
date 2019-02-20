@@ -1,7 +1,6 @@
 #include <iostream>
 #include <windows.h>
 #include <queue>
-#include <stack>
 #include <string>
 #include <sstream>
 #include <conio.h>
@@ -45,7 +44,7 @@ Node *root = new Node();
 Node *preNode,*targetNode;
 string preNodeToCPDir="",CPToTargetDir="";
 string preNodeToCPID="",targetNodeToCPID="";
-stack<Node*> Q;
+queue<Node*> Q;
 void fillSpace(short sI,short eI,short sJ,short eJ)
 {
 	for(int i=sI;i<=eI;i++)
@@ -445,11 +444,11 @@ void printNodeDe(Node *node)
 }
 void firstRun()
 {
-	Node *first = Q.top();
+	Node *first = Q.front();
 	Q.pop();
 	exploreChilds(first);
 	preNode = first;
-//	root->leftChild = Q.top();
+//	root->leftChild = Q.front();
 //	root->rightChild = Q.back();
 }
 void mapDirToParent(char dir)
@@ -652,9 +651,7 @@ void moveToCommonParent(string stt,char x,char y)
 bool sh=false;
 	string tem="";
 	string ho =stt;
-	if(stt.length()!=0)
-	{
-		if(x!=y &&preNode->isRoot==false)	
+	if(x!=y &&preNode->isRoot==false)	
 	{
 		tem = reverseDir(stt);
 		stt = tem;
@@ -742,18 +739,17 @@ bool sh=false;
 		}	
 	}
 	else cout<<"in parent\n";
-	}
 	
 }
 
 void moveToTarget(string st)
 {
-	int i=-1;
+	int i;
 	if(st.length()>1)
 		i=st.length()-2;
-	else if(preNode->isRoot==true ||(preNodeToCPDir.length()==0 && CPToTargetDir.length()==1))
+	else if(preNode->isRoot==true)
 		i=st.length()-1;
-	
+		else i =-1;
 	for(;i>=0;i--)
 	{
 		if(st[i]=='l')
@@ -793,13 +789,8 @@ void moveToTarget(string st)
 void moveIndirectly(Node *node)
 {
 	returnCommonParent();
-	cout<<"pass return com\n";
 	moveToCommonParent(preNodeToCPDir,preDir,tarDir);
-	cout<<"pass move to comm\n";
-	cout<<"leng :"<<CPToTargetDir.length()<<endl;
 	moveToTarget(CPToTargetDir);
-	cout<<"pass move to tar\n";
-	int x;cin>>x;
 	exploreChilds(node);
 	changeDirDE();
 	moveForward(NULL);
@@ -880,11 +871,10 @@ main()
 			firstRun();
 			while(Q.empty()==false)
 			{
-				Node *node = Q.top();
-				Q.pop();
+				Node *node = Q.front();
 				targetNode = node;
 				moveIndirectly(node);
-				
+				Q.pop();
 				preID = node->ID;
 				preNode = node;
 			}
