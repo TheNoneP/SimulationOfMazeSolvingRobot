@@ -6,10 +6,10 @@
 #include <conio.h>
 using namespace std;
 int space[11][20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                   0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
-				   1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,
-				   0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
-				   0,0,0,6,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,
+                   1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+				   1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,
+				   6,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+				   0,0,0,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				   0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
 				   0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
 				   0,0,0,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,
@@ -25,9 +25,10 @@ bool goal = false;
 int  itr = 1,lC=-1,rC=-1,Con= 10;
 int BArray[20]={0};
 short parent=1;
-int ID=0,preID=1,nexID=1;
+int ID=0,preID=0,nexID=1;
 
-struct Node{
+class Node{
+	public :
 	Node *parentPointer=NULL;
 	Node *leftChild=NULL;
 	Node *middleChild=NULL;
@@ -37,6 +38,7 @@ struct Node{
 	int ID;
 	int NID;
 	bool isDiscovered;
+	bool isRoot;
 };
 Node *root = new Node();
 Node *preNode,*targetNode;
@@ -262,7 +264,7 @@ void moveForward(Node *node)
 					updatePos(SI,SJ-1);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(20);
+					Sleep(300);
 					SJ -=1;
 				}else goal = true;
 				}
@@ -279,7 +281,7 @@ void moveForward(Node *node)
 					updatePos(SI,SJ+1);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(20);
+					Sleep(300);
 					SJ +=1;
 				}else goal = true;
 				}
@@ -296,7 +298,7 @@ void moveForward(Node *node)
 					updatePos(SI-1,SJ);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(20);
+					Sleep(300);
 					SI -=1;
 				}else goal = true;
 				}
@@ -313,7 +315,7 @@ void moveForward(Node *node)
 					updatePos(SI+1,SJ);
 					resetPos(SI,SJ);
 					printSpace();
-					Sleep(20);
+					Sleep(300);
 					SI +=1;
 				}else goal = true;
 				}
@@ -356,9 +358,13 @@ void initializeNode(Node *node,char dirFromPar,char dirInMaz,bool isDis,Node *le
 }
 void initializeRoot()
 {
-	initializeNode(root,'f','f',false,NULL,NULL,NULL,NULL,assignID(),0);
+	initializeNode(root,'A','A',false,NULL,NULL,NULL,NULL,assignID(),0);
 	updateID();
 	Q.push(root);
+	root->isRoot=true;
+	cout<<"root as pointer :"<<sizeof(root)<<endl;
+	Node n;
+	cout<<"root using * op :"<<sizeof(*root)<<endl;int x ;cin>>x;
 }
 
 void exploreChilds(Node *node)
@@ -441,6 +447,7 @@ void firstRun()
 	Node *first = Q.front();
 	Q.pop();
 	exploreChilds(first);
+	preNode = first;
 //	root->leftChild = Q.front();
 //	root->rightChild = Q.back();
 }
@@ -476,20 +483,6 @@ void backToParent(Node *node)
 	}
 	mapDirToParent(node->dirInMaze);
 }
-string returnSub(string st,int s)
-{
-	string tem="";
-	if(s==0)return st.substr(0,st.find('|'));
-	else
-	{
-		while(st[s]!='|')
-		{
-			tem +=st[s];
-			s++;
-		}
-		return tem;
-	}
-}
 void displayQ(queue<int> tem)
 {
 	cout<<"displaying queue\n";
@@ -499,6 +492,7 @@ void displayQ(queue<int> tem)
 	}
 	cout<<endl;
 }
+int pos =-1;
 int returnCommonNID(queue<int> pre,queue<int> tar)
 {
 	int tem1,tem2,val;
@@ -532,31 +526,35 @@ int returnCommonNID(queue<int> pre,queue<int> tar)
 	}
 	return val;
 }
-string findDirToTar(Node *node,int com)
+int posOfCommon(int x,queue<int> tem)
 {
-	string st="";
-	while(node->NID!=com)
+	int count = -1;
+	if(tem.size()==1)
 	{
-		st +=node->dirInMaze;
-		node = node->parentPointer;
+		return 0;	
 	}
-	return st;
+	else
+	{
+		count=0;
+		while(tem.empty()==false)
+		{
+			if(tem.front()==x)
+			break;
+			count++;
+			tem.pop();
+		}
+		return count;
+	}
 }
-int returnCommonParent()
+char preDir,tarDir;
+int index;
+string returnCommonParent()
 {
 	queue<int> pre;
 	queue<int> tar;
 	Node *tt1,*tt2;
 	tt1=preNode;
 	tt2=targetNode;
-//	printNodeDe(tt1);
-//	cout<<"-------------------------\n";
-//	printNodeDe(tt2);
-//cout<<"tt1 :"<<tt1<<en dl;
-//cout<<"tt2 :"<<tt2<<endl;
-//cout<<"root :"<<root<<endl;
-//cout<<tt1->ID<<endl;
-
 	while(tt1!=NULL )	
 	{
 		ostringstream c1,c2,c3,c4;
@@ -574,149 +572,229 @@ int returnCommonParent()
 		
 		//cout<<"entered !!!"<<endl;
 	}
-	cout<<"pre size"<<pre.size()<<endl;
-	cout<<"tar size"<<tar.size()<<endl;
-	cout<<"dir :"<<preNodeToCPDir<<endl;
-	cout<<"dir2 :"<<CPToTargetDir<<endl;
+
 	displayQ(pre);
 	displayQ(tar);
 	int theVar = returnCommonNID(pre,tar);
-	cout<<"common is :"<<theVar<<endl;
-	tt2 = targetNode;
-	CPToTargetDir = findDirToTar(tt2,theVar);
-	bool found = false;
-	string c;
-	int ind = -1,coc=0;
-	cin>>ind;
-//	for(int i=0;i<preNodeToCPID.length();i++){
-//		for(int j=0;j<targetNodeToCPID.length();j++)
-//			if(preNodeToCPID[i]==targetNodeToCPID[j]){
-//			c = preNodeToCPID[i];
-//			ind = i;
-//			coc++;
-//		}
-//		if(coc>1)break;
-//	}
-//	preNodeToCPID = preNodeToCPID.substr(0,preNodeToCPID.find(c));
-//	preNodeToCPDir = preNodeToCPDir.substr(0,preNodeToCPID.length());
-//	targetNodeToCPID = targetNodeToCPID.substr(0,targetNodeToCPID.find(c));
-//	CPToTargetDir = CPToTargetDir.substr(0,targetNodeToCPID.length());
-//	cout<<"id :"<<preNodeToCPID<<endl;
-//	cout<<"id :"<<targetNodeToCPID<<endl;
-//	cout<<"dir :"<<preNodeToCPDir<<endl;
-//	cout<<"dir2 :"<<CPToTargetDir<<endl;
-//	cout<<"common parent ID :"<<c<<endl;
-//	int xd ;cin>>xd;
-	return theVar;
+
+	preNodeToCPDir = preNodeToCPDir.substr(0,posOfCommon(theVar,pre));
+	CPToTargetDir = CPToTargetDir.substr(0,posOfCommon(theVar,tar));
+	preDir = preNodeToCPDir[preNodeToCPDir.length()-1];
+	tarDir = CPToTargetDir[CPToTargetDir.length()-1];
+//	cout<<"preN :"<<preNodeToCPDir<<endl;
+//	cout<<"tarN :"<<CPToTargetDir<<endl;
+	return "";
 }
-void moveDirectly(Node *node)
+void maping(char tem,char t)
 {
-	char DIM = node->dirInMaze;
-	if(DIM=='l')
+	char x = t;
+	if(x=='l')
 	{
-		checkDir(SI,SJ);
-		while(lefT==false)
+		if(tem=='r')
 		{
 			moveForward(NULL);
-			checkDir(SI,SJ);
-		}
-		changeDirToLeft();
-		moveForward(NULL);	
-	}
-	else if(DIM=='r')
-	{
-		checkDir(SI,SJ);
-		while(righT==false)
+		}else
 		{
-			moveForward(NULL);
-			checkDir(SI,SJ);
-		}
-		changeDirToRight();
-		moveForward(NULL);
-	}
-	else 
-	{
-		moveForward(NULL);
-		moveForward(NULL);
-	}
-	exploreChilds(node);
-	cout<<"going to backToParent()\n";
-	backToParent(node);
-}
-void moveToCommonParent()
-{
-	int id = returnCommonParent();
-	//cout<<"idD :"<<id<<endl;
-	if(preNodeToCPDir.length()>0)
-	{
-//		cout<<"length :"<<preNodeToCPDir.length()<<endl;
-//		cout<<"preIDs :"<<preNode->ID<<endl;
-//		cout<<"preNode :"<<preNode<<endl;
-		while(preNode->NID!=id && preNode!=NULL)
-		{
-//			cout<<"backing \n";
-			backToParent(preNode);
-			preNode = preNode->parentPointer;
-		}
-	}
-//	else cout<<"already in parent !\n";
-	
-}
-void moveToTarget(Node *node)
-{
-	//int xa;cin>>xa;
-	for(int i=CPToTargetDir.length()-1;i>=0;i--)
-	{
-	//	cout<<"char by char :"<<CPToTargetDir[i]<<endl;
-		
-		if(CPToTargetDir[i]=='l')
-		{
-			checkDir(SI,SJ);
-			while(lefT==false)
-			{
-				moveForward(NULL);
-				checkDir(SI,SJ);
-			}
 			changeDirToLeft();
 			moveForward(NULL);
-			
 		}
-		else if(CPToTargetDir[i]=='r')
+	}
+	else if(x=='r')
+	{
+		if(tem=='l')
 		{
-			checkDir(SI,SJ);
-			while(righT==false)
-			{
-				moveForward(NULL);
-				checkDir(SI,SJ);
-			}
+			moveForward(NULL);
+		}
+		else
+		{
 			changeDirToRight();
 			moveForward(NULL);
 		}
-		else if(CPToTargetDir[i]=='f')
+	}
+	else
+	{
+		if(tem=='l')
+		{
+			changeDirToRight();
+			moveForward(NULL);
+		}
+		else
+		{
+			changeDirToLeft();
+			moveForward(NULL);
+		}
+	}
+}
+
+string reverseDir(string st)
+{
+	string hold="";
+	for(int i=0;i<st.length();i++)
+	{
+		if(st[i]=='l')
+		{
+			hold +='r';
+		}
+		else if(st[i]=='r')
+		{
+			hold +='l';
+		}
+		else
+		{
+			hold +='f';
+		}
+	}
+	return hold;
+}
+void moveToCommonParent(string stt,char x,char y)
+{
+bool sh=false;
+	string tem="";
+	string ho =stt;
+	if(x!=y &&preNode->isRoot==false)	
+	{
+		tem = reverseDir(stt);
+		stt = tem;
+		changeDirDE();
+		sh = true;
+	}
+	if(stt.length()!=0)
+	{
+		for(int k=0;k<stt.length()-1&&stt.length()>0;k++)
+		{
+			
+			if(stt[k]=='l')
+					{
+						checkDir(SI,SJ);
+						while(lefT==false)
+						{
+							moveForward(NULL);
+							checkDir(SI,SJ);
+						}
+						changeDirToLeft();
+						moveForward(NULL);
+					}
+					else if(stt[k]=='r')
+					{
+						checkDir(SI,SJ);
+						while(righT==false)
+						{
+							moveForward(NULL);
+							checkDir(SI,SJ);
+						}
+						changeDirToRight();
+						moveForward(NULL);
+					}
+					else
+					{
+						checkDir(SI,SJ);
+						while(righT==false && lefT==false && front==true)
+						{
+							moveForward(NULL);
+							checkDir(SI,SJ);
+						}
+						moveForward(NULL);
+					}
+		}
+		if(stt[stt.length()-1]=='f')
 		{
 			checkDir(SI,SJ);
-			while(front==true && (lefT==false && righT==false))
-			{
-				moveForward(NULL);
-				checkDir(SI,SJ);
-			}
-			moveForward(NULL);
-//			moveForward();
-//			checkDir(SI,SJ);
-//			while(front==true && lefT==false && righT ==false)
-//			{
-//				moveForward();
-//				checkDir(SI,SJ);
-//			}
+			while(righT==false && lefT==false && front==true)
+				{
+					moveForward(NULL);
+					checkDir(SI,SJ);
+				}	
+					maping(CPToTargetDir[CPToTargetDir.length()-1],ho[ho.length()-1]);
+					
 		}
+		else 
+		{
+			if(stt[stt.length()-1]=='l')
+					{
+						checkDir(SI,SJ);
+						while(lefT==false)
+						{
+							moveForward(NULL);
+							checkDir(SI,SJ);
+						}
+						
+						
+					maping(CPToTargetDir[CPToTargetDir.length()-1],ho[ho.length()-1]);
+				
+					}
+					else if(stt[stt.length()-1]=='r')
+					{
+						checkDir(SI,SJ);
+						while(righT==false)
+						{
+							moveForward(NULL);
+							checkDir(SI,SJ);
+						}
+					maping(CPToTargetDir[CPToTargetDir.length()-1],ho[ho.length()-1]);
+						
+					}
+				
+		
+					
+		}	
+	}
+	else cout<<"in parent\n";
+	
+}
+
+void moveToTarget(string st)
+{
+	int i;
+	if(st.length()>1)
+		i=st.length()-2;
+	else if(preNode->isRoot==true)
+		i=st.length()-1;
+		else i =-1;
+	for(;i>=0;i--)
+	{
+		if(st[i]=='l')
+				{
+					checkDir(SI,SJ);
+					while(lefT==false)
+					{
+						moveForward(NULL);
+						checkDir(SI,SJ);
+					}
+					changeDirToLeft();
+					moveForward(NULL);
+				}
+				else if(st[i]=='r')
+				{
+					checkDir(SI,SJ);
+					while(righT==false)
+					{
+						moveForward(NULL);
+						checkDir(SI,SJ);
+					}
+					changeDirToRight();
+					moveForward(NULL);
+				}
+				else
+				{
+					checkDir(SI,SJ);
+					while(righT==false && lefT==false && front==true)
+					{
+						moveForward(NULL);
+						checkDir(SI,SJ);
+					}
+					moveForward(NULL);
+				}	
 	}
 }
 void moveIndirectly(Node *node)
 {
-	moveToCommonParent();
-	moveToTarget(NULL);
+	returnCommonParent();
+	moveToCommonParent(preNodeToCPDir,preDir,tarDir);
+	moveToTarget(CPToTargetDir);
 	exploreChilds(node);
-	backToParent(node);
+	changeDirDE();
+	moveForward(NULL);
+	changeDirDE();
 	preNodeToCPDir="";
 	preNodeToCPID="";
 	CPToTargetDir="";
@@ -770,12 +848,8 @@ main()
 {
 	short val = 4;
 	Node *p;
-	short sI,eI,sJ,eJ;
 	initializeRoot();
-	int x;
-	cout<<sizeof(int*);
-	cin>>x;
-	BArray[itr]=Con;
+	
 	do
 	{
 		
@@ -789,35 +863,22 @@ main()
 		else if(val==2) printSpace();
 		else if(val==3) 
 		{
-			cin>>sI;cin>>sJ;
-			setGoalPos(sI-1,sJ-1);
+//			cin>>sI;cin>>sJ;
+//			setGoalPos(sI-1,sJ-1);
 		}
 		else if(val ==4)
 		{
 			firstRun();
-			
 			while(Q.empty()==false)
 			{
 				Node *node = Q.front();
-				//printNodeDe(node);
-				cout<<"\npreID :"<<preID<<"\nnode ID :"<<node->ID<<endl;
-				//int xy;cin>>xy;
-				if(preID==node->ID)
-				{
-					moveDirectly(node);
-				}
-				else 
-				{
-					targetNode = node;
-					moveIndirectly(node);
-				}
-//				cout<<"\n New Node\n";
-//				cout<<"Q size :"<<Q.size()<<endl;
-				preID= node->ID;
-				preNode = node->parentPointer;
+				targetNode = node;
+				moveIndirectly(node);
 				Q.pop();
-				//int xx;cin>>xx;
+				preID = node->ID;
+				preNode = node;
 			}
+			
 			cout<<"nodes :"<<co()<<endl;
 			
 		}
